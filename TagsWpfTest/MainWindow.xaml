@@ -5,8 +5,38 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TagsWpfTest"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="564.497" Width="1009.024" Loaded="Window_Loaded">
+    
+    <Window.Resources>
+        <Style x:Key="TreeViewItemStyle_ExpandAll" TargetType="{x:Type TreeViewItem}">
+            <Setter Property="IsExpanded" Value="True"/>
+        </Style>
+    </Window.Resources>
+    
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="0*"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="loadTagTreeButton" Content="Load tree" HorizontalAlignment="Left" Margin="10,184,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="loadTagTreeButton_Click"/>
+        <Button x:Name="unloadTagTreeButton" Content="Unload tree" HorizontalAlignment="Left" Margin="10,333,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="unloadTagTreeButton_Click"/>
+        <Button x:Name="selectFileButton" Content="Select file" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="selectFileButton_Click"/>
+        <Button x:Name="exitButton" Content="Exit" HorizontalAlignment="Left" Margin="10,488,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="exitButton_Click"/>
+        <Label x:Name="selectedFileLabel" Content="" HorizontalAlignment="Left" Margin="108,15,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.235,0.007" Height="26" Width="883"/>
+        <TreeView x:Name="outTreeView" HorizontalAlignment="Left" Height="485" Margin="108,46,0,0" VerticalAlignment="Top" Width="883" TreeViewItem.Expanded="outTreeView_Expanded" ItemContainerStyle="{StaticResource TreeViewItemStyle_ExpandAll}" TreeViewItem.Selected="TreeViewItemSelected" >
+          <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Childs}">
+                    <TextBlock Text="{Binding Name}"/>
+                    
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+            <TreeView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Cursor="Arrow" Header="AddTag" Click="MenuItem_Click"/>
+                    <MenuItem Header="RenameTag" Click="MenuItem_Click_1"/>
+                    <MenuItem Header="RemoveTag" Name="removeMenuItem" Click="MenuItem_Click_2"/>
+                </ContextMenu>
+            </TreeView.ContextMenu>
+        </TreeView>
     </Grid>
 </Window>
