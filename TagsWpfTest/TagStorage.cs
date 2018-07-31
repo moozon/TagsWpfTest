@@ -87,7 +87,7 @@ namespace TagsWpfTest
                 }
             }
             else
-                MessageBox.Show("Укажите меня XML файла.", "Не указано имя XML файла");
+                MessageBox.Show("Сначала выберите Xml файл.", "Не указано имя XML файла");
         }
 
         //Открытые методы
@@ -141,6 +141,8 @@ namespace TagsWpfTest
         /// </summary>
         public void SaveXmlDocument()
         {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return;
             try
             {
                 xmlDoc.Save(fileName);

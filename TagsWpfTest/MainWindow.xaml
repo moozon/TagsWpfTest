@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TagsWpfTest"
         mc:Ignorable="d"
-        Title="MainWindow" Height="564.497" Width="1009.024" Loaded="Window_Loaded">
+        Title="MainWindow" Height="564.497" Width="1009.024" Loaded="Window_Loaded" Closing="Window_Closing">
 
     <Window.Resources>
         <Style x:Key="TreeViewItemStyle_ExpandAll" TargetType="{x:Type TreeViewItem}">
@@ -74,99 +74,100 @@
     </Window.Resources>
 
     <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="532" Margin="5,0,-8,-1" Width="1004">
-        <Button x:Name="loadTagTreeButton" Content="Load tree" HorizontalAlignment="Left" Margin="10,150,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="loadTagTreeButton_Click"/>
-        <Button x:Name="unloadTagTreeButton" Content="Upload tree" HorizontalAlignment="Left" Margin="10,265,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="uploadTagTreeButton_Click"/>
+        <Button x:Name="loadTagTreeButton" Content="Load tree" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="loadTagTreeButton_Click"/>
+        <Button x:Name="unloadTagTreeButton" Content="Upload tree" HorizontalAlignment="Left" Margin="10,343,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="uploadTagTreeButton_Click"/>
         <Button x:Name="selectFileButton" Content="Select file" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="selectFileButton_Click"/>
-        <Button x:Name="exitButton" Content="Exit" HorizontalAlignment="Left" Margin="10,488,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="exitButton_Click"/>
-        <Button x:Name="saveButton" Content="Save As" HorizontalAlignment="Left" Margin="10,377,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="saveButton_Click"/>
-        <Label x:Name="selectedFileLabel" Content="" HorizontalAlignment="Left" Margin="108,15,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.235,0.007" Height="26" Width="883"/>
-        <TreeView x:Name="outTreeView" Height="485" Margin="108,46,0,0" Width="883" TreeViewItem.Expanded="outTreeView_Expanded" TreeViewItem.Selected="TreeViewItemSelected" HorizontalAlignment="Left" VerticalAlignment="Top" ItemContainerStyle="{StaticResource TreeViewItemStyle_ExpandAll}" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Right">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate  ItemsSource="{Binding ChildCollection}" >
-                    <TabPanel>
-                        <TabPanel.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Cursor="Arrow" Header="AddTag" Click="MenuItem_Click"/>
-                                <MenuItem Header="RenameTag" Click="MenuItem_Click_1"/>
-                                <MenuItem Header="RemoveTag" Name="removeMenuItem" Click="MenuItem_Click_2"/>
-                            </ContextMenu>
-                        </TabPanel.ContextMenu>
-                        <Image    Width="15" Height="15" Style="{StaticResource SelectImage}"/>
-                        <TextBlock >
-                            <TextBlock.Style>
-                                <Style>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Type}" Value="Element">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="Text">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Value}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="None">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="Attribute">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="CDATA">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="EntityReference">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="Entity">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="ProcessingInstruction">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="Comment">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="Document">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="DocumentType">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="DocumentFragment">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="Notation">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="Whitespace">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="SignificantWhitespace">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="EndElement">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="EndEntity">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Type}" Value="XmlDeclaration">
-                                            <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
+        <Button x:Name="saveButton" Content="Save As" HorizontalAlignment="Left" Margin="10,487,0,0" VerticalAlignment="Top" Width="85" Height="35" Click="saveButton_Click"/>
+        <Label x:Name="selectedFileLabel" Content="" HorizontalAlignment="Left" Margin="100,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.235,0.007" Height="26" Width="876" FontSize="14"/>
+        <DockPanel HorizontalAlignment="Center" Height="486" LastChildFill="False" Margin="95,46,5,0" VerticalAlignment="Center" Width="904">
+            <TreeView x:Name="outTreeView" Height="484" Width="884" TreeViewItem.Selected="TreeViewItemSelected" HorizontalAlignment="Left" VerticalAlignment="Top" ItemContainerStyle="{StaticResource TreeViewItemStyle_ExpandAll}" VerticalContentAlignment="Bottom" HorizontalContentAlignment="Right" DockPanel.Dock="Top" Margin="10,0,0,0">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate  ItemsSource="{Binding ChildCollection}" >
+                        <TabPanel>
+                            <TabPanel.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Cursor="Arrow" Header="AddTag" Click="MenuItem_Click"/>
+                                    <MenuItem Header="RenameTag" Click="MenuItem_Click_1"/>
+                                    <MenuItem Header="RemoveTag" Name="removeMenuItem" Click="MenuItem_Click_2"/>
+                                </ContextMenu>
+                            </TabPanel.ContextMenu>
+                            <Image    Width="15" Height="15" Style="{StaticResource SelectImage}"/>
+                            <TextBlock >
+                                <TextBlock.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Type}" Value="Element">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="Text">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Value}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="None">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="Attribute">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="CDATA">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="EntityReference">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="Entity">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="ProcessingInstruction">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="Comment">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="Document">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="DocumentType">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="DocumentFragment">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="Notation">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="Whitespace">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="SignificantWhitespace">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="EndElement">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="EndEntity">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="XmlDeclaration">
+                                                <Setter Property="TextBlock.Text" Value="{Binding Name}"></Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
 
-                        </TextBlock>
-                        <TextBlock Text=" | "/>
-                        <TextBlock Text="{Binding Type}"/>
-                        <TextBlock Text=" | "/>
-                        <TextBlock Text="{Binding Value}"/>
-                        <TextBlock Text=" | "/>
-                        <TextBlock Text="{Binding FullPath}"/>
-                        <TextBlock Text=" | "/>
-                        <TextBlock Text="{Binding Level}"/>
-                    </TabPanel>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
+                            </TextBlock>
+                            <TextBlock Text=" | "/>
+                            <TextBlock Text="{Binding Type}"/>
+                            <TextBlock Text=" | "/>
+                            <TextBlock Text="{Binding Value}"/>
+                            <TextBlock Text=" | "/>
+                            <TextBlock Text="{Binding FullPath}"/>
+                            <TextBlock Text=" | "/>
+                            <TextBlock Text="{Binding Level}"/>
+                        </TabPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
 
-        </TreeView>
+            </TreeView>
+        </DockPanel>
     </Grid>
 </Window>
