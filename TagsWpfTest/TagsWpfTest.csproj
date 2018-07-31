@@ -56,6 +56,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="NewTagWindow.xaml.cs">
+      <DependentUpon>NewTagWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="RenameWindow.xaml.cs">
+      <DependentUpon>RenameWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TagItem.cs" />
     <Compile Include="TagStorage.cs" />
     <Page Include="MainWindow.xaml">
@@ -70,6 +76,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="NewTagWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RenameWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -96,6 +110,26 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icons\Attribute.jpg" />
+    <Resource Include="icons\CDATA.jpg" />
+    <Resource Include="icons\Comment.jpg" />
+    <Resource Include="icons\Document.jpg" />
+    <Resource Include="icons\DocumentFragment.jpg" />
+    <Resource Include="icons\DocumentType.jpg" />
+    <Resource Include="icons\Element.jpg" />
+    <Resource Include="icons\EndElement.jpg" />
+    <Resource Include="icons\EndEntity.jpg" />
+    <Resource Include="icons\Entity.jpg" />
+    <Resource Include="icons\EntityReference.jpg" />
+    <Resource Include="icons\None.jpg" />
+    <Resource Include="icons\Notation.jpg" />
+    <Resource Include="icons\ProcessingInstruction.jpg" />
+    <Resource Include="icons\SignificantWhitespace.jpg" />
+    <Resource Include="icons\Text.jpg" />
+    <Resource Include="icons\Whitespace.jpg" />
+    <Resource Include="icons\XmlDeclaration.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

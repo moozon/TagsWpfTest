@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Xml;
 
 
@@ -18,7 +19,7 @@ namespace TagsWpfTest
         private string _value;       //Значение тега
         private string _name;        //Имя тега
         private int _level;          //Уровень вложенности тега
-        private XmlNodeType _type;   //Тип тега        
+        private string _type;   //Тип тега        
         private string _fullPath;    //Путь вложенности тега
         private XmlNode _root;       //Корневой узел
         private XmlNodeList _emptyXmlNodeList;
@@ -32,7 +33,7 @@ namespace TagsWpfTest
         public XmlDocument xmlDoc;              //Xml документ
         public ObservableCollection<TagItem> childCollection;          //Коллекция дочерних элементов типа TagItem
         public event PropertyChangedEventHandler PropertyChanged;       //Событие на изменение имени
-
+        public bool isNewTag = false;
 
         //Конструктор
         public TagItem(XmlNode element)
@@ -45,15 +46,84 @@ namespace TagsWpfTest
             _root = xmlDoc.DocumentElement;
             _value = element.Value;
             _name = element.Name;
-            _type = element.NodeType;
+            _type = element.NodeType.ToString();
             _allChildCollection = new ObservableCollection<TagItem>();
             childCollection = new ObservableCollection<TagItem>();
             parentElements = new List<XmlNode>();   //Инициализация списка родительских тегов
+
+            
             UpdatePathLevel();                      //Вычисление уровня(Level) и пути(FullPath) вложенности
             CreateChildCollection(element);         //Создание коллекции дочерних элементов
 
         }
 
+        public TagItem(XmlElement element, string type)
+        {
+            tag = element;
+            xmlDoc = element.OwnerDocument;
+            _root = xmlDoc.DocumentElement;
+            _value = element.Value;
+            _name = element.Name;
+            _type = type;
+            _allChildCollection = new ObservableCollection<TagItem>();
+            childCollection = new ObservableCollection<TagItem>();
+            parentElements = new List<XmlNode>();   //Инициализация списка родительских тегов
+
+
+            UpdatePathLevel();                      //Вычисление уровня(Level) и пути(FullPath) вложенности
+            CreateChildCollection(element);         //Создание коллекции дочерних элементов
+        }
+
+        public TagItem(string nameEmptyElement, string type)
+        {
+            isNewTag = true;
+            //if (type != XmlNodeType.Element.ToString() && type != XmlNodeType.Text.ToString())
+            //{
+            //    MessageBox.Show("Неверно указан тип. Повторите попытку", "Внимание!!!");
+            //    return;
+            //}
+            XmlNode element = new XmlDocument().CreateElement(nameEmptyElement);
+            tag = element;
+            //if (element.ParentNode != null)
+            //{
+                xmlDoc = element.OwnerDocument;
+                _root = xmlDoc.DocumentElement;
+                _value = element.Value;
+            //}
+            _name = element.Name;
+            _type = type;
+
+            _allChildCollection = new ObservableCollection<TagItem>();
+            childCollection = new ObservableCollection<TagItem>();
+            parentElements = new List<XmlNode>();   //Инициализация списка родительских тегов
+
+
+            UpdatePathLevel();                      //Вычисление уровня(Level) и пути(FullPath) вложенности
+            CreateChildCollection(element);         //Создание коллекции дочерних элементов
+        }
+
+        public TagItem(string nameEmptyElement)
+        {
+            isNewTag = true;
+            XmlNode element = new XmlDocument().CreateElement(nameEmptyElement);
+            tag = element;
+            //if (element.ParentNode != null)
+            //{
+                xmlDoc = element.OwnerDocument;
+                _root = xmlDoc.DocumentElement;
+                _value = element.Value;                
+                _type = element.NodeType.ToString();
+            //}
+            _name = element.Name;
+
+            _allChildCollection = new ObservableCollection<TagItem>();
+            childCollection = new ObservableCollection<TagItem>();
+            parentElements = new List<XmlNode>();   //Инициализация списка родительских тегов
+
+
+            UpdatePathLevel();                      //Вычисление уровня(Level) и пути(FullPath) вложенности
+            CreateChildCollection(element);         //Создание коллекции дочерних элементов
+        }
 
         /// <summary>
         /// Создание коллекции дочерних TagItem элементов указанного тега
@@ -61,6 +131,8 @@ namespace TagsWpfTest
         /// <param _name="element"></param>
 
         //Свойства
+
+        
         public string Name
         {
             get
@@ -99,7 +171,7 @@ namespace TagsWpfTest
             }
 
         }
-        public XmlNodeType Type
+        public string Type
         {
             get
             {
@@ -134,7 +206,7 @@ namespace TagsWpfTest
                     return _emptyXmlNodeList;
             }
         }
-        public ObservableCollection<TagItem> AllChilds
+        public ObservableCollection<TagItem> AllChildCollection
         {
             get
             {
@@ -142,7 +214,7 @@ namespace TagsWpfTest
                 return _allChildCollection;
             }
         }
-        public ObservableCollection<TagItem> Childs
+        public ObservableCollection<TagItem> ChildCollection
         {
             get
             {
@@ -152,7 +224,7 @@ namespace TagsWpfTest
             set
             {
                 childCollection = value;
-                NotifyPropertyChanged();
+                //NotifyPropertyChanged();
             }
         }
         public TagItem Parent
@@ -184,42 +256,45 @@ namespace TagsWpfTest
         /// </summary>
         private void UpdatePathLevel()
         {
-            parentElements.Clear();     //Очистка списка родительских тегов
-            _fullPath = "";              //Очистка пути родительских тегов
-            if (tag.ParentNode.NodeType != XmlNodeType.Document)    //Условие добавления тегов в список родительских тегов
-                parentElements.Add(tag.ParentNode);
-            else
-                parentElements.Add(tag);
-            while (true)                //Перебор родительских тегов
+            if (tag.ParentNode != null)
             {
-                XmlNode element = parentElements.Last().ParentNode;
-
-                if (element != null)
+                parentElements.Clear();     //Очистка списка родительских тегов
+                _fullPath = "";              //Очистка пути родительских тегов
+                if (tag.ParentNode.NodeType != XmlNodeType.Document)    //Условие добавления тегов в список родительских тегов
+                    parentElements.Add(tag.ParentNode);
+                else
+                    parentElements.Add(tag);
+                while (true)                //Перебор родительских тегов
                 {
-                    if (element.NodeType != XmlNodeType.Document)   //Добавляем в список, если тип тега != Document
+                    XmlNode element = parentElements.Last().ParentNode;
+
+                    if (element != null)
                     {
-                        parentElements.Add(element);
+                        if (element.NodeType != XmlNodeType.Document)   //Добавляем в список, если тип тега != Document
+                        {
+                            parentElements.Add(element);
+                        }
+                        else break;
                     }
                     else break;
                 }
-                else break;
-            }
 
-            parentElements.Reverse();                   //Реверс элементов списка для построения пути(FullPath) вложенности
-            foreach (XmlNode element in parentElements)
-            {
-                _fullPath += element.Name + ".";         //Формирование строки FullPath
-            }
+                parentElements.Reverse();                   //Реверс элементов списка для построения пути(FullPath) вложенности
+                foreach (XmlNode element in parentElements)
+                {
+                    _fullPath += element.Name + ".";         //Формирование строки FullPath
+                }
 
-            if (_name == "Root")
-                _level = parentElements.Count;           //Вычисление уровня(Level) вложенности
-            else
-            {
-                _fullPath += _name;
-                _level = parentElements.Count + 1;
-            }
+                if (_name == "Root")
+                    _level = parentElements.Count;           //Вычисление уровня(Level) вложенности
+                else
+                {
+                    _fullPath += _name;
+                    _level = parentElements.Count + 1;
+                }
 
-            parentElements.Reverse();                   //Обратный реверс
+                parentElements.Reverse();                   //Обратный реверс
+            }
         }
         //private void CreateChildCollection(XmlNode node)
         //{
@@ -323,6 +398,7 @@ namespace TagsWpfTest
             }
             catch (Exception e)
             {
+                //MessageBox.Show("Не удалось добавить ", "Внимание!!!");
                 throw new Exception(e.Message, e);
             }
         }

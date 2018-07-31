@@ -129,21 +129,13 @@ namespace TagsWpfTest
             tagItemCollection2 = new ObservableCollection<XmlNode>();
         }
 
-        public void CheckChilds()
-        {
-            if (tagItem != null && tagItem.Type == XmlNodeType.Element)
-            {
-
-            }
-        }
-
         public ObservableCollection<TagItem> TagItemCollection1
         {
             get
             {
                 CreateTagItemCollection1(tagStorage.Root);
                 return tagItemCollection1;
-                //return tagItem.AllChilds;
+                //return tagItem.AllChildCollection;
                 //return tagItem.TagItemCollection;
             }
 
@@ -154,7 +146,7 @@ namespace TagsWpfTest
             {
                 CreateTagItemCollection2(tagStorage.Root);
                 return tagItemCollection2;
-                //return tagItem.AllChilds;
+                //return tagItem.AllChildCollection;
                 //return tagItem.TagItemCollection;
             }
 
@@ -212,37 +204,44 @@ namespace TagsWpfTest
         XmlNodeList xmlNodelist;
         My myClass;
         private ObservableCollection<TagItem> tagCollection;
-        private ObservableCollection<TagItem> childCollectionMainWindow;
+        //private ObservableCollection<TagItem> childCollectionMainWindow;
         private DependencyObject parentTreeViewItem;
         private TreeViewItem selectedTreeViewItem;
-
+        private ItemsControl virtualTree;
+        private bool _isChanged = false;
+        private bool isText = false;
         public event PropertyChangedEventHandler PropertyChanged;
-
-
+        //private Thread threadLoad;
+        //private Thread threadLoad;
+        Task taskLoad;
+        Task taskUpload;
 
         public MainWindow()
         {
             InitializeComponent();
+            //System.Windows.Input.ApplicationCommands.
         }
         private void Window_Loaded(object sender, EventArgs e)
         {
-            tagStorage = new TagStorage(fileName);
-            tagItem = new TagItem(tagStorage.Root);
+            //tagStorage = new TagStorage(fileName);
+            
             //emptyElement = tagStorage.xmlDoc.CreateElement("Empty");
             emptyElement = new XmlDocument().DocumentElement;
+            tagItem = new TagItem(emptyElement);
             tagCollection = new ObservableCollection<TagItem>();
-            childCollectionMainWindow = new ObservableCollection<TagItem>();
-            //Task.Factory.StartNew(() => tagItem = new TagItem(emptyElement));
+            //childCollectionMainWindow = new ObservableCollection<TagItem>();
+            
             //tagItem = new TagItem(emptyElement);            
             //xmlNodelist = tagItem.ChildXmlNodes;
 
             //outTreeView.ItemsSource = TagItemCollection;
             this.Title = "TreeView";
-            CreateTagCollection(tagStorage.Root);
+            //CreateTagCollection(tagStorage.Root);
             //myClass = new My();
             //this.DataContext = myClass;
             this.DataContext = this;
-            outTreeView.ItemsSource = TagCollection;
+            Task.Factory.StartNew(() => outTreeView.ItemsSource = TagCollection);
+            //outTreeView.ItemsSource = TagCollection;
             //outTreeView.ItemsSource = CategoryCreator.GetCreatorList();
             //Test();
         }
@@ -252,6 +251,7 @@ namespace TagsWpfTest
 
 
         //Properties
+                
 
         public ObservableCollection<TagItem> MainCollectionMainWindow
         {
@@ -266,7 +266,7 @@ namespace TagsWpfTest
         {
             get
             {
-                return tagItem.Childs;
+                return tagItem.ChildCollection;
             }
         }
 
@@ -297,17 +297,38 @@ namespace TagsWpfTest
 
         //Methods
 
+        private string CreateXPathName(XmlNode node)
+        {
+            string stringName = "";
+            //XmlNode node = selectedTag.tag;
+
+            while (node.ParentNode != null && node.ParentNode.NodeType != XmlNodeType.Document)
+            {
+                if (node.NodeType != XmlNodeType.Text)
+                {
+                    stringName = stringName.Insert(0, "/" + node.Name);
+                    node = node.ParentNode;
+                }
+                else
+                {
+                    //tagStorage.RemoveTypedTag(xPathName, "");
+                    isText = true;
+                    //break;
+                    stringName = stringName.Insert(0, "/" + node.Name);
+                    node = node.ParentNode;
+                }
+            }
+            stringName = stringName.Insert(0, "/");
+            return stringName;
+        }
+        /// <summary>
+        /// Запоминаем выделенный узел
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TreeViewItemSelected(object sender, RoutedEventArgs e)
         {
-            //TagItem selectedTag = (TagItem)outTreeView.SelectedItem;
             this.selectedTreeViewItem = (e.OriginalSource as TreeViewItem);
-            //VisualTreeHelper.
-
-            //parentTreeViewItem = (outTreeView.FindName(selectedTag.Parent.Name) as TreeViewItem);
-            //TreeViewItem tvi = (TreeViewItem)(e.OriginalSource as TreeViewItem).Parent;
-            //this.parent = tvi.Parent;
-            // set the last tree view item selected variable which may be used elsewhere as there is no other way I have found to obtain the TreeViewItem container (may be null)
-             
         }
 
         public void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
@@ -326,6 +347,7 @@ namespace TagsWpfTest
 
         private void CreateTagCollection(XmlNode element)
         {
+            tagCollection.Clear();
                 if (element != null && element.HasChildNodes)
                 {
                     foreach (XmlNode e in element.ChildNodes)
@@ -333,15 +355,6 @@ namespace TagsWpfTest
                     tagCollection.Add(new TagItem(e));
                     }
                 }            
-        }
-
-        public void CheckChilds()
-        {
-            if (tagItem != null && tagItem.Type == XmlNodeType.Element)
-            {
-                //if (tagItem.HasChilds)
-                //outTreeView.ItemTemplate.
-            }
         }
 
         private void loadTree()
@@ -354,6 +367,27 @@ namespace TagsWpfTest
         }
         private void exitButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_isChanged)
+            {
+                MessageBoxResult result = MessageBox.Show("Структура дерева изменена. Сохранить дерево в Xml файл?", "Внимание!!!", MessageBoxButton.OKCancel);
+                if (result == MessageBoxResult.OK)
+                {
+                    Microsoft.Win32.SaveFileDialog sfd = new Microsoft.Win32.SaveFileDialog();
+                    sfd.FileName = "Document"; 
+                    sfd.DefaultExt = ".xml"; 
+                    sfd.Filter = "XML documents (.xml)|*.xml";
+
+                    // Show open file dialog box
+                    Nullable<bool> resultSfd = sfd.ShowDialog();
+                    if (resultSfd == true)
+                    {
+                        this.tagStorage.fileName = sfd.FileName;
+                        this.tagStorage.SaveXmlDocument();
+                    }
+                }
+                
+            }
+
             Application.Current.Shutdown();
         }
 
@@ -379,120 +413,314 @@ namespace TagsWpfTest
 
         private void loadTagTreeButton_Click(object sender, RoutedEventArgs e)
         {
-            //Task.Factory.StartNew(new Action(() =>
-            //{
-            //    TagStorage tagStorage = new TagStorage(fileName);
-            //    TagItem tagItem = new TagItem(tagStorage.Root);
-            //    ItemsControl ic = new ItemsControl();
-            //    //ic.ItemsSource = tagItem.GetChilds();
-            //    outDataGrid.ItemsSource = tagItem.GetChilds();
-            //    //XmlNodeList xmlList = tagItem.GetChilds();
-            //    //this.outTextBlock.DataContext = xmlList;
-            //    //this.outTextBox.DataContext = xmlList;
-            //}));
-
             tagStorage = new TagStorage(fileName);
             tagItem = new TagItem(tagStorage.Root);
-            outTreeView.ItemsSource = tagItem.AllChilds;
+            CreateTagCollection(tagStorage.Root);
+
+            Task.Factory.StartNew(() => 
+            { 
+            
+
+            outTreeView.Dispatcher.Invoke(() => outTreeView.ItemsSource = TagCollection);
+            //XmlNodeList xmlList = tagItem.GetChilds();
+            //this.outTextBlock.DataContext = xmlList;
+            //this.outTextBox.DataContext = xmlList;
+            });
 
 
-            //tagItem = await Task.Factory.StartNew(() => new TagItem(tagStorage.Root));
-            //outTreeView.ItemsSource = tagItem.GetChilds();
-
-
-            //Thread th = new Thread(new ThreadStart(() =>
+            //taskLoad = new Task(() =>
             //{
+            //    tagStorage = new TagStorage(fileName);
+            //    tagItem = new TagItem(tagStorage.Root);
+            //    CreateTagCollection(tagStorage.Root);
 
-            //    //ic.ItemsSource = tagItem.GetChilds();
-            //    outTreeView.Dispatcher.Invoke(() => outTreeView.ItemsSource = tagItem.GetChilds());
+            //    outTreeView.Dispatcher.Invoke(() => outTreeView.ItemsSource = TagCollection);
+            //    //XmlNodeList xmlList = tagItem.GetChilds();
+            //    //this.outTextBlock.DataContext = xmlList;
+            //    //this.outTextBox.DataContext = xmlList;
+            //});
+            //taskLoad.Start();
+                
+                
+
+
+            //thread = new Thread(new ThreadStart(() =>
+            //{
+            //    tagStorage = new TagStorage(fileName);
+            //    tagItem = new TagItem(tagStorage.Root);
+            //    CreateTagCollection(tagStorage.Root);
+                
+            //    outTreeView.Dispatcher.Invoke(() => outTreeView.ItemsSource = TagCollection);
             //    //XmlNodeList xmlList = tagItem.GetChilds();
             //    //this.outTextBlock.DataContext = xmlList;
             //    //this.outTextBox.DataContext = xmlList;
             //}));
-            //th.SetApartmentState(ApartmentState.STA);
-            //th.Start();
+            //thread.SetApartmentState(ApartmentState.STA);
+            //thread.Start();
+            loadTagTreeButton.IsEnabled = false;
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            TagItem selectedTag = (TagItem)outTreeView.SelectedItem;
+            var newTagWindow = new NewTagWindow();
+            newTagWindow.ShowDialog();
 
-            if (tagCollection.Contains(selectedTag))
+            string newName = newTagWindow.NewName;
+            string newType = newTagWindow.NewType;
+
+            if (string.IsNullOrWhiteSpace(newName))
             {
-                foreach (TagItem tag in tagCollection)
+                MessageBox.Show("Введите имя");
+                return;
+            }
+
+            bool isValidType = false;
+
+            foreach(string type in Enum.GetNames(typeof(XmlNodeType)))
+            {
+                if (newType == type)
+                    isValidType = true;
+            }
+
+            if (!isValidType)
+            {
+                MessageBox.Show("Неверно указан тип. Повторите попытку", "Внимание!!!");
+                return;
+            }
+            else
+            {
+                TagItem selectedTag = (TagItem)outTreeView.SelectedItem;
+
+                if (tagCollection.Contains(selectedTag))
+                {
+                    foreach (TagItem tag in this.tagCollection)
+                    {
+                        if (tag == selectedTag)
+                        {
+                            selectedTag.ChildCollection.Add(new TagItem(newName, newType));
+                            //TagItem selectedTreeViewItemParent2 = (TagItem)ItemsControl.ItemsControlFromItemContainer(selectedTreeViewItem).DataContext;
+                            //selectedTreeViewItemParent2.GetChildByName(selectedTag.Name).AppendChild(tagStorage.xmlDoc.CreateElement(newName));
+                        }
+                    }
+                    _isChanged = true;
+                }
+                else
+                {
+                    selectedTag.ChildCollection.Add(new TagItem(newName, newType));
+
+                    TagItem selectedTreeViewItemParent2 = (TagItem)ItemsControl.ItemsControlFromItemContainer(selectedTreeViewItem).DataContext;
+                    selectedTreeViewItemParent2.GetChildByName(selectedTag.Name).AppendChild(tagStorage.xmlDoc.CreateElement(newName));
+                    //selectedTag.tag.AppendChild(tagStorage.xmlDoc.CreateElement(newName));
+                    _isChanged = true;
+                }
+            }
+            
+        }   //Add item
+
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            var renameWindow = new RenameWindow();
+            renameWindow.ShowDialog();
+
+            string newName = renameWindow.NewName;
+
+            if (string.IsNullOrWhiteSpace(newName))
+            {
+                MessageBox.Show("Введите имя");
+                return;
+            }
+
+            TagItem selectedTag = (TagItem)outTreeView.SelectedItem;
+            if (this.TagCollection.Contains(selectedTag))
+            {
+                foreach (TagItem tag in TagCollection)
                 {
                     if (tag == selectedTag)
-                        tag.Childs.Add(new TagItem(tagStorage.Root));
+                    {
+                        tag.Name = newName;
+                        _isChanged = true;
+                        string xPathName = CreateXPathName(selectedTag.tag);
+                        //xPathName = xPathName.TrimEnd
+                        if (!isText)
+                            tagStorage.RenameTag(xPathName, newName);
+                        else
+                        {
+                            //xPathName = xPathName.TrimEnd(@"#text".ToCharArray());
+                            tagStorage.RenameTag(xPathName, newName);
+                        }
+                        return;
+                    }
                 }
             }
             else
             {
-                TagItem parent = selectedTag.Parent;
-                parent.Childs.Add(new TagItem(tagStorage.Root));
-                parent.NotifyPropertyChanged();
+                TagItem selectedTreeViewItemParent = (TagItem)ItemsControl.ItemsControlFromItemContainer(selectedTreeViewItem).DataContext;
+                foreach (TagItem tag in selectedTreeViewItemParent.ChildCollection)
+                {
+                    if (tag == selectedTag)
+                    {
+                        tag.Name = newName;
+                        _isChanged = true;
+                        string xPathName = CreateXPathName(selectedTag.tag);
+                        //xPathName = xPathName.TrimEnd
+                        if (!isText)
+                            tagStorage.RenameTag(xPathName, newName);
+                        else
+                        {
+                            //xPathName = xPathName.TrimEnd(@"#text".ToCharArray());
+                            tagStorage.RenameTag(xPathName, newName);
+                        }
+                        return;
+                    }
+
+                }
+                //string xPathName = CreateXPathName(selectedTag.tag);
+                ////xPathName = xPathName.TrimEnd
+                //if (!isText)
+                //    tagStorage.RenameTag(xPathName, newName);
+                //else
+                //{
+                //    //xPathName = xPathName.TrimEnd(@"#text".ToCharArray());
+                //    tagStorage.RenameTag(xPathName, newName);
+                //}
+
             }
 
-            //foreach (XmlNode el in )
-            //MessageBox.Show(outTreeView.SelectedItem.ToString(), selectedTag.Name);
-        }
+            _isChanged = true;
 
-        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
-        {
-            
-            TagItem selectedTag = (TagItem)outTreeView.SelectedItem;
-            TreeViewItem selectedTreeViewItem = (TreeViewItem)outTreeView.SelectedItem;
+            //reeViewItem selectedTreeViewItem = (TreeViewItem)outTreeView.SelectedItem;
             //TreeViewItem selectedTreeViewItem = (TreeViewItem)(e.OriginalSource as MenuItem).ItemsSource;
             //TreeViewItem selectedTreeViewItem = (MenuItem)e.OriginalSource;
-            selectedTreeViewItem.Header = "123";
+            //selectedTreeViewItem.Header = "123";
             //(e.OriginalSource is TreeViewItem).Name = "123";
             //MessageBox.Show("Rename");
-        }
+        }   //Rename item
 
         private void MenuItem_Click_2(object sender, RoutedEventArgs e)
-        {
-            //TreeViewItem selectedTVI = outTreeView.SelectedItem as TreeViewItem;
-            //TreeViewItem item = (TreeViewItem)(outTreeView.ItemContainerGenerator.ContainerFromItem(outTreeView.SelectedItem));
-
-            DependencyObject o = selectedTreeViewItem;
-
-            TreeViewItem selectedItem = (TreeViewItem)outTreeView.SelectedItem; 
-            TagItem selectedTag = (TagItem)outTreeView.SelectedItem;
-
-            if (tagCollection.Contains(selectedTag))
-            {
-                this.TagCollection.Remove(selectedTag);
-            }
-            else
+        {       
+            
+            
+            MessageBoxResult result = MessageBox.Show("Удалить выбранную ветвь?", "Внимание!!!", MessageBoxButton.OKCancel);
+            if (result == MessageBoxResult.OK)
             {
 
-                TagItem parent = selectedTag.Parent;
-                parent.RemoveChildTag(selectedTag.Name);
+                TagItem selectedTag = (TagItem)outTreeView.SelectedItem;
+                //Выбранный тег принадлежит родительской колекции
+                if (tagCollection.Contains(selectedTag))
+                {
+                    this.TagCollection.Remove(selectedTag);
+                    //string xPathName = "";
+                    //XmlNode currentTag = selectedTag.tag;
+                    //while (currentTag.ParentNode != null && currentTag.ParentNode.NodeType != XmlNodeType.Document)
+                    //{
+                    //    if (currentTag.NodeType != XmlNodeType.Text)
+                    //    {
+                    //        xPathName = xPathName.Insert(0, "/" + currentTag.Name);
+                    //        currentTag = currentTag.ParentNode;
+                    //    }
+                    //    else
+                    //    {
+                    //        //tagStorage.RemoveTypedTag(xPathName, "");
+                    //        isText = true;
+                    //        //break;
+                    //        xPathName = xPathName.Insert(0, "/" + currentTag.Name);
+                    //        currentTag = currentTag.ParentNode;
+                    //    }
+                    //}
+                    string xPathName = CreateXPathName(selectedTag.tag);
+                    //xPathName = xPathName.Insert(0, "/");
+                    if (!isText)
+                        tagStorage.RemoveTag(xPathName);
+                    else
+                    {
+                        xPathName = xPathName.TrimEnd(@"#text".ToCharArray());
+                        tagStorage.RemoveTypedTag(xPathName, "");
+                    }
+                    if (isText)
+                        isText = false;
+                    _isChanged = true;
+                }
+                //
+                else
+                {
+                    if (selectedTag.isNewTag)
+                    {
+                        tagStorage.RemoveNewTag(selectedTag.Name);
+                        TagItem selectedTreeViewItemParent2 = (TagItem)ItemsControl.ItemsControlFromItemContainer(selectedTreeViewItem).DataContext;
+                        //tagItem.RemoveChildTag(selectedTag.Name);
+                        //tagStorage.RemoveTag(selectedTag.Name);
+                        selectedTreeViewItemParent2.ChildCollection.Remove(selectedTag);
+                        return;
+                    }
+                    //string xPathName = "";
+                    //XmlNode node = selectedTag.tag;
 
-                //MessageBox.Show(parent.childCollection.Remove(selectedTag).ToString());
-                //parent.Childs.Remove(selectedTag);
-
-                parent.CreateChildCollection(parent.tag);
-                NotifyPropertyChanged();
-                //parent.NotifyPropertyChanged();
-                //CreateTagCollection(tagStorage.Root);
-                //parent.childCollection.RemoveAt(0);
-                //MessageBox.Show(parent.childCollection.RemoveAt(0));
-                //MessageBox.Show(selectedTag.Parent.childCollection.Remove(selectedTag).ToString());
-                //outTreeView.UpdateDefaultStyle();
-                //outTreeView.
-                //out
-                //outTreeView.ItemsSource = TagCollection;
-                //MessageBox.Show("");
-                //TagItem selectedTag = (TagItem)outTreeView.SelectedItem;
-                //tagCollection.Remove((TagItem)outTreeView.SelectedItem);
-
-                //myClass.tagItemCollection2.Remove((XmlNode)outTreeView.SelectedItem);
+                    //while (node.ParentNode != null && node.ParentNode.NodeType != XmlNodeType.Document)
+                    //{
+                    //    if (node.NodeType != XmlNodeType.Text)
+                    //    {
+                    //        xPathName = xPathName.Insert(0, "/" + node.Name);
+                    //        node = node.ParentNode;
+                    //    }
+                    //    else
+                    //    {
+                    //        //tagStorage.RemoveTypedTag(xPathName, "");
+                    //        isText = true;
+                    //        //break;
+                    //        xPathName = xPathName.Insert(0, "/" + node.Name);
+                    //        node = node.ParentNode;
+                    //    }
+                    //}
+                    //xPathName = xPathName.Insert(0, "/");
+                    string xPathName = CreateXPathName(selectedTag.tag);
+                    if (!isText)
+                        tagStorage.RemoveTag(xPathName);
+                    else
+                    {
+                        xPathName = xPathName.TrimEnd(@"#text".ToCharArray());
+                        tagStorage.RemoveTypedTag(xPathName, "");
+                    }
+                    if (isText)
+                        isText = false;
+                    //tagItem.RemoveChildTag(selectedTag.Name);
+                    //virtualTree = ItemsControl.ItemsControlFromItemContainer(selectedTreeViewItem);
+                    TagItem selectedTreeViewItemParent = (TagItem)ItemsControl.ItemsControlFromItemContainer(selectedTreeViewItem).DataContext;
+                    //tagItem.RemoveChildTag(selectedTag.Name);
+                    //tagStorage.RemoveTag(selectedTag.Name);
+                    selectedTreeViewItemParent.ChildCollection.Remove(selectedTag);
+                    _isChanged = true;
+                }
             }
-        }
+        }   //Remove
 
-        private void unloadTagTreeButton_Click(object sender, RoutedEventArgs e)
+        private void uploadTagTreeButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(tagCollection.Count.ToString());
+            MessageBoxResult result = MessageBox.Show("Выгрузить дерево и сохранить изменения в Xml файле?", "Внимание!!!", MessageBoxButton.OKCancel);
+            if (result == MessageBoxResult.OK)
+            {
+                this.tagStorage.SaveXmlDocument();
+                Task.Factory.StartNew(() =>
+                {                    
+                    this.outTreeView.Dispatcher.Invoke(() => outTreeView.ItemsSource = null);
+                });
+                
+                //taskLoad = null;
+                loadTagTreeButton.IsEnabled = true;
+            }
+
+            //tagStorage.Root.RemoveAll();
+            //tagStorage.Root.AppendChild(tagItem.)
+
+
+
+
+            //foreach (TagItem tag in outTreeView.ItemsSource)
+            //tagStorage.Root.AppendChild(tag.tag);
+            //this.outTreeView.ItemsSource = null;
+
+            //foreach (TagItem tag in TagCollection)
+            // tagStorage.Root.AppendChild(tag.tag);
+
         }
 
         private void outTreeView_Expanded(object sender, RoutedEventArgs e)
@@ -507,7 +735,7 @@ namespace TagsWpfTest
             ////{
             ////TagItem selectedTag = (TagItem)item.Tag;
 
-            //foreach (TagItem t in selectedTag.Childs)
+            //foreach (TagItem t in selectedTag.ChildCollection)
             //{
             //    TreeViewItem newItem = new TreeViewItem();
             //    newItem.Tag = t;
@@ -516,6 +744,31 @@ namespace TagsWpfTest
             //    item.Items.Add(newItem);
             //}
         }
-    
+
+        private void TextBoxIn_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            MessageBox.Show("");
+        }
+
+        private void saveButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+                Microsoft.Win32.SaveFileDialog sfd = new Microsoft.Win32.SaveFileDialog();
+                sfd.FileName = "Document";
+                sfd.DefaultExt = ".xml";
+                sfd.Filter = "XML documents (.xml)|*.xml";
+
+                
+                Nullable<bool> resultSfd = sfd.ShowDialog();
+                if (resultSfd == true)
+                {
+                string oldFileName = this.tagStorage.fileName;
+                this.tagStorage.fileName = sfd.FileName;
+                this.tagStorage.SaveXmlDocument();
+                this.tagStorage.fileName = oldFileName;
+                }
+            _isChanged = false;
+
+        }
     }
 }

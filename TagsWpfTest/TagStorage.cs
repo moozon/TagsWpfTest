@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Xml;
 
 namespace TagsWpfTest
@@ -11,10 +12,12 @@ namespace TagsWpfTest
         //Закрытые поля
         public XmlDocument xmlDoc; //Xml документ
         private XmlNode root;       //Корневой узел
+
         //private TagItem tag;      //Переменная TagItem класса
 
         //Открытые поля
         public string fileName = "TagsTest.xml";      //Xml файл
+        public XmlNode parent;
         //public string fileName2 = "TagsTest2.xml";    //Тестовый Xml файл
 
         //Конструктор
@@ -34,6 +37,11 @@ namespace TagsWpfTest
             get
             {
                 return root;
+            }
+            set
+            {
+                if (value != null && value.NodeType == XmlNodeType.Element)
+                    root = value;
             }
         }
 
@@ -64,15 +72,22 @@ namespace TagsWpfTest
         /// </summary>
         private void LoadXmlDocument()
         {
-            try
+            if (!string.IsNullOrEmpty(fileName))
             {
-                xmlDoc.Load(fileName);
-                root = xmlDoc.DocumentElement;
+                try
+                {
+                    xmlDoc.Load(fileName);
+                    root = xmlDoc.DocumentElement;
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Проверьте правильность имени XML файла", "Имя XML файла указано неверно.");
+                    //throw new Exception(e.Message, e);
+
+                }
             }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message, e);
-            }
+            else
+                MessageBox.Show("Укажите меня XML файла.", "Не указано имя XML файла");
         }
 
         //Открытые методы
@@ -143,13 +158,45 @@ namespace TagsWpfTest
         {
             try
             {
+                //FindParent()
                 xmlDoc.SelectSingleNode(path).CreateNavigator().DeleteSelf();  //Удаление осуществляется с помощью метода DeleteSelf класса XPathNavigator
+
             }
             catch (Exception e)
             {
                 throw new Exception(e.Message, e);
             }
 
+        }
+        public void RemoveNewTag(string path)
+        {
+            string stringName = "";
+            FindParent(path);
+            while (parent.ParentNode != null && parent.ParentNode.NodeType != XmlNodeType.Document)
+            {
+                stringName = stringName.Insert(0, "/" + parent.Name);
+                parent = parent.ParentNode;
+
+            }
+            stringName = stringName + "/" + path;
+            stringName = stringName.Insert(0, "/");
+            try
+            {
+                //FindParent()
+                xmlDoc.SelectSingleNode(stringName).CreateNavigator().DeleteSelf();  //Удаление осуществляется с помощью метода DeleteSelf класса XPathNavigator
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message, e);
+            }
+
+        }
+        public void RemoveTypedTag(string path, string value)
+        {
+            if (path[path.Length - 1] == '/')
+                path = path.TrimEnd('/');
+            xmlDoc.SelectSingleNode(path).CreateNavigator().SetValue(value);
         }
         /// <summary>
         /// Добавляет новый тег в конец списка дочерних тегов
@@ -174,17 +221,55 @@ namespace TagsWpfTest
         /// </summary>
         /// <param _name="path">Путь переименовываемого тега</param>
         /// <param _name="newname">Новое имя тега</param>
-        public void RenameTag(string path, string newname)
+        public void RenameTag(string path, string newName)
         {
             try
             {
                 TagItem tagItem = new TagItem(root.SelectSingleNode(path));
-                tagItem.RenameTag(newname);
+                tagItem.RenameTag(newName);
             }
             catch (Exception e)
             {
                 throw new Exception(e.Message, e);
             }
         }
+
+        public XmlNode FindParent(string nameChild)
+        {
+            FindChild(xmlDoc.DocumentElement, nameChild);
+            return parent;
+
+            //XmlNode currentNode = childNode;
+            //if (currentNode.HasChildNodes)
+            //{
+            //    foreach (XmlNode node in currentNode.ChildNodes)
+            //    {
+            //        if (node.Name == currentNode.Name)
+            //        {
+            //            parent = node.ParentNode;
+            //            return;
+            //        }
+            //        else
+            //            FindParent(node);
+            //    }
+            //}
+        }
+
+        public void FindChild(XmlNode node, string nameChild)
+        {
+            if (node.HasChildNodes)
+            {
+                foreach (XmlNode child in node.ChildNodes)
+                {
+                    if (child.Name == nameChild)
+                    {
+                        parent = node;
+                        return;
+                    }                    
+                    FindChild(child, nameChild);
+                }
+            }
+        }
+
     }
 }
