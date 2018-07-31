@@ -9,18 +9,12 @@ namespace TagsWpfTest
     /// </summary>
     public class TagStorage
     {
-        //Закрытые поля
-        public XmlDocument xmlDoc; //Xml документ
-        private XmlNode root;       //Корневой узел
+        public XmlDocument xmlDoc;          //Xml документ
+        private XmlNode root;               //Корневой узел
+        public string fileName = "";        //Xml файл
+        public XmlNode parent;              //Родительский элемент
 
-        //private TagItem tag;      //Переменная TagItem класса
-
-        //Открытые поля
-        public string fileName = "TagsTest.xml";      //Xml файл
-        public XmlNode parent;
-        //public string fileName2 = "TagsTest2.xml";    //Тестовый Xml файл
-
-        //Конструктор
+        //Constructor
         public TagStorage(string fileName)
         {
             this.fileName = fileName;
@@ -28,7 +22,8 @@ namespace TagsWpfTest
             LoadXmlDocument();          //Загрузка дерева
         }
 
-        //Свойства
+        //Properties
+
         /// <summary>
         /// Возвращает корневой узел
         /// </summary>
@@ -45,7 +40,8 @@ namespace TagsWpfTest
             }
         }
 
-        //Закрытые методы
+        //Methods
+
         /// <summary>
         /// Рекурсивно перебирает все теги и выводит на экран их имена, пути, значения, типы, уровни вложенности
         /// </summary>
@@ -79,7 +75,7 @@ namespace TagsWpfTest
                     xmlDoc.Load(fileName);
                     root = xmlDoc.DocumentElement;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     MessageBox.Show("Проверьте правильность имени XML файла", "Имя XML файла указано неверно.");
                     //throw new Exception(e.Message, e);
@@ -89,8 +85,6 @@ namespace TagsWpfTest
             else
                 MessageBox.Show("Сначала выберите Xml файл.", "Не указано имя XML файла");
         }
-
-        //Открытые методы
         /// <summary>
         /// Возвращает указанный тег
         /// </summary>
@@ -160,7 +154,6 @@ namespace TagsWpfTest
         {
             try
             {
-                //FindParent()
                 xmlDoc.SelectSingleNode(path).CreateNavigator().DeleteSelf();  //Удаление осуществляется с помощью метода DeleteSelf класса XPathNavigator
 
             }
@@ -170,6 +163,10 @@ namespace TagsWpfTest
             }
 
         }
+        /// <summary>
+        /// Удаление добавленного тега
+        /// </summary>
+        /// <param name="path"></param>
         public void RemoveNewTag(string path)
         {
             string stringName = "";
@@ -194,8 +191,14 @@ namespace TagsWpfTest
             }
 
         }
+        /// <summary>
+        /// Удаление типизированного тега
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="value"></param>
         public void RemoveTypedTag(string path, string value)
         {
+            //Удаление лишнего символа из полного пути тега
             if (path[path.Length - 1] == '/')
                 path = path.TrimEnd('/');
             xmlDoc.SelectSingleNode(path).CreateNavigator().SetValue(value);
@@ -235,28 +238,21 @@ namespace TagsWpfTest
                 throw new Exception(e.Message, e);
             }
         }
-
+        /// <summary>
+        /// Поиск родительского элемента для добавленного тега
+        /// </summary>
+        /// <param name="nameChild"></param>
+        /// <returns></returns>
         public XmlNode FindParent(string nameChild)
         {
             FindChild(xmlDoc.DocumentElement, nameChild);
             return parent;
-
-            //XmlNode currentNode = childNode;
-            //if (currentNode.HasChildNodes)
-            //{
-            //    foreach (XmlNode node in currentNode.ChildNodes)
-            //    {
-            //        if (node.Name == currentNode.Name)
-            //        {
-            //            parent = node.ParentNode;
-            //            return;
-            //        }
-            //        else
-            //            FindParent(node);
-            //    }
-            //}
         }
-
+        /// <summary>
+        /// Вспомогательный метод для поиска родительского элемента для добавленного тега
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="nameChild"></param>
         public void FindChild(XmlNode node, string nameChild)
         {
             if (node.HasChildNodes)
