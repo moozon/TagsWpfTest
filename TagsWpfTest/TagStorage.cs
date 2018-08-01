@@ -9,10 +9,11 @@ namespace TagsWpfTest
     /// </summary>
     public class TagStorage
     {
-        public XmlDocument xmlDoc;          //Xml документ
-        private XmlNode root;               //Корневой узел
+        private XmlNode _root;               //Корневой узел
+
         public string fileName = "";        //Xml файл
         public XmlNode parent;              //Родительский элемент
+        public XmlDocument xmlDoc;          //Xml документ
 
         //Constructor
         public TagStorage(string fileName)
@@ -31,12 +32,12 @@ namespace TagsWpfTest
         {
             get
             {
-                return root;
+                return _root;
             }
             set
             {
                 if (value != null && value.NodeType == XmlNodeType.Element)
-                    root = value;
+                    _root = value;
             }
         }
 
@@ -73,7 +74,7 @@ namespace TagsWpfTest
                 try
                 {
                     xmlDoc.Load(fileName);
-                    root = xmlDoc.DocumentElement;
+                    _root = xmlDoc.DocumentElement;
                 }
                 catch (Exception)
                 {
@@ -94,7 +95,7 @@ namespace TagsWpfTest
         {
             try
             {
-                return root.SelectSingleNode(path);
+                return _root.SelectSingleNode(path);
             }
             catch (Exception e)
             {
@@ -108,7 +109,7 @@ namespace TagsWpfTest
         {
             try
             {
-                PrintRec(root);
+                PrintRec(_root);
             }
             catch (Exception e)
             {
@@ -123,7 +124,7 @@ namespace TagsWpfTest
         {
             try
             {
-                PrintRec(root.SelectSingleNode(name));
+                PrintRec(_root.SelectSingleNode(name));
             }
             catch (Exception e)
             {
@@ -213,7 +214,7 @@ namespace TagsWpfTest
         {
             try
             {
-                TagItem tagItem = new TagItem(root.SelectSingleNode(path));
+                TagItem tagItem = new TagItem(_root.SelectSingleNode(path));
                 tagItem.AddChildTag(name);
             }
             catch (Exception e)
@@ -230,7 +231,7 @@ namespace TagsWpfTest
         {
             try
             {
-                TagItem tagItem = new TagItem(root.SelectSingleNode(path));
+                TagItem tagItem = new TagItem(_root.SelectSingleNode(path));
                 tagItem.RenameTag(newName);
             }
             catch (Exception e)

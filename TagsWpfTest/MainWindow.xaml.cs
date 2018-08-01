@@ -21,6 +21,7 @@ namespace TagsWpfTest
         private bool _isChanged = false;                        //Если есть изменения в дереве
         private bool _isText = false;                           //Если тип узла текст
         private bool _isOpenXmlDocument = false;                //Если XML документ открыт
+
         public TagStorage tagStorage;                           //Переменная TagStorage
         public TagItem tagItem;                                 //Переменная TagItem
         
@@ -64,7 +65,7 @@ namespace TagsWpfTest
             //В качестве контента данных используем самих себя
             this.DataContext = this;
             //Загрузка пустого дерева в отдельном потоке
-            Task.Factory.StartNew(() => outTreeView.ItemsSource = TagCollection);
+            Task.Factory.StartNew(() => outTreeView.Dispatcher.Invoke(() => outTreeView.ItemsSource = TagCollection));
         }
         /// <summary>
         /// Формирование полного пути тега для метода RemoveTag() для измения шаблона дерева
